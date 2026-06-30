@@ -7,23 +7,21 @@
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <!-- 飞行中的图片副本，识别后从预览位飞向命中垃圾桶 -->
   <img id="flyImg" class="fly-img" alt="" />
 
   <header class="hero">
-    <div class="hero-logo">♻</div>
+    <div class="hero-logo">AI</div>
     <h1>智能垃圾分类</h1>
-    <p class="subtitle">上传一张图片，AI 帮你判断该投哪个桶</p>
+    <p class="subtitle">上传图片，识别垃圾类别，记录结果并沉淀错例样本</p>
   </header>
 
   <main class="container">
-    <!-- 上传区 -->
-    <section class="panel upload-panel">
+    <section class="panel upload-panel" aria-label="图片上传">
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
         <input id="fileInput" type="file" accept="image/*" hidden />
         <div id="dropPrompt" class="drop-prompt">
-          <div class="drop-icon">📷</div>
-          <p class="drop-title">点击选择 或 拖拽图片到此处</p>
+          <div class="drop-icon">IMG</div>
+          <p class="drop-title">点击选择或拖拽图片到此处</p>
           <p class="drop-hint">支持 JPG / PNG</p>
         </div>
         <img id="preview" class="preview" alt="预览图" hidden />
@@ -32,34 +30,61 @@
         <button id="predictBtn" class="btn btn-primary" disabled>开始识别</button>
         <button id="resetBtn" class="btn btn-ghost" hidden>重新上传</button>
       </div>
-      <p id="statusMsg" class="status-msg"></p>
+      <p id="statusMsg" class="status-msg" aria-live="polite"></p>
     </section>
 
-    <!-- 结果区 -->
-    <section id="resultPanel" class="panel result-panel" hidden>
+    <section id="resultPanel" class="panel result-panel" hidden aria-label="识别结果">
       <div class="result-head">
-        <div id="resultBadge" class="result-badge">可回收物</div>
+        <div id="resultBadge" class="result-badge">其他垃圾</div>
         <div class="result-meta">
           <div class="confidence">
             <span id="confidenceNum" class="confidence-num">0%</span>
             <span class="confidence-label">置信度</span>
           </div>
           <div class="item-class">
-            小类：<span id="itemClassCn">—</span>
+            小类：<span id="itemClassCn">-</span>
           </div>
         </div>
       </div>
-      <p id="adviceText" class="advice-text">—</p>
+      <p id="adviceText" class="advice-text">-</p>
 
-      <!-- Top-4 条形图 -->
       <div class="bars">
         <h3 class="bars-title">四大类概率</h3>
         <div id="barList" class="bar-list"></div>
       </div>
+
+      <div class="correct-actions">
+        <button id="correctBtn" class="btn btn-warn" type="button">分类错了</button>
+      </div>
+
+      <div id="correctPanel" class="correct-panel" hidden>
+        <div class="correct-panel-head">
+          <h3>纠正分类</h3>
+          <p>选择正确小类，图片会按小类落盘，后续可并入训练集。</p>
+        </div>
+        <div id="catChips" class="cat-chips" role="listbox" aria-label="正确小类"></div>
+        <label class="note-label" for="correctionNote">备注</label>
+        <textarea id="correctionNote" class="note-input" rows="3" maxlength="500" placeholder="例如：这是饮料瓶，应该归为塑料"></textarea>
+        <div class="correct-panel-actions">
+          <button id="submitCorrectionBtn" class="btn btn-primary" type="button" disabled>提交纠错</button>
+          <button id="cancelCorrectionBtn" class="btn btn-ghost" type="button">取消</button>
+        </div>
+        <p id="correctionMsg" class="status-msg" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="historyPanel" class="panel history-panel" hidden aria-label="识别历史">
+      <div class="history-head">
+        <div>
+          <h2>识别历史</h2>
+          <p>保存在当前浏览器，刷新后仍可查看。</p>
+        </div>
+        <button id="clearHistoryBtn" class="btn btn-ghost btn-small" type="button">清空</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
     </section>
   </main>
 
-  <!-- 底部四垃圾桶 -->
   <footer class="bins" id="bins">
     <div class="bin" data-key="recyclable">
       <div class="bin-body"><span class="bin-label">可回收物</span></div>

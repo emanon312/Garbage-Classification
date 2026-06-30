@@ -1,54 +1,109 @@
-// ===== 配置 =====
-// mock 开关：true 时不请求后端，直接用假数据演示完整流程。
-// 即使为 false，当 fetch /predict 失败时也会自动降级到 mock，保证脱离后端可演示。
 const USE_MOCK = false;
+const HISTORY_KEY = "garbage-classifier.history.v1";
+const HISTORY_LIMIT = 30;
 
-// 四大类元信息（颜色严格对应 CONTRACT 的 group_key）
 const GROUP_META = {
   recyclable: { cn: "可回收物", color: "#1E88E5", advice: "请投入蓝色可回收物桶" },
-  kitchen:    { cn: "厨余垃圾", color: "#43A047", advice: "请投入绿色厨余垃圾桶" },
-  hazardous:  { cn: "有害垃圾", color: "#E53935", advice: "请投入红色有害垃圾桶" },
-  other:      { cn: "其他垃圾", color: "#757575", advice: "请投入灰色其他垃圾桶" },
+  kitchen: { cn: "厨余垃圾", color: "#43A047", advice: "请投入绿色厨余垃圾桶" },
+  hazardous: { cn: "有害垃圾", color: "#E53935", advice: "请投入红色有害垃圾桶" },
+  other: { cn: "其他垃圾", color: "#757575", advice: "请投入灰色其他垃圾桶" },
 };
 
-// ===== DOM 引用 =====
-const fileInput   = document.getElementById("fileInput");
-const dropZone    = document.getElementById("dropZone");
-const dropPrompt  = document.getElementById("dropPrompt");
-const preview     = document.getElementById("preview");
-const predictBtn  = document.getElementById("predictBtn");
-const resetBtn    = document.getElementById("resetBtn");
-const statusMsg   = document.getElementById("statusMsg");
+const CLASS_CN = {
+  cardboard: "纸板",
+  glass: "玻璃",
+  metal: "金属",
+  plastic: "塑料",
+  clothes: "衣物",
+  paper: "纸张",
+  bananapeel: "香蕉皮",
+  vegetable: "蔬菜",
+  battery: "电池",
+  lightbulb: "灯泡",
+  drugs: "药品",
+  papercup: "纸杯",
+};
+
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+const dropPrompt = document.getElementById("dropPrompt");
+const preview = document.getElementById("preview");
+const predictBtn = document.getElementById("predictBtn");
+const resetBtn = document.getElementById("resetBtn");
+const statusMsg = document.getElementById("statusMsg");
 const resultPanel = document.getElementById("resultPanel");
 const resultBadge = document.getElementById("resultBadge");
 const confidenceNum = document.getElementById("confidenceNum");
 const itemClassCn = document.getElementById("itemClassCn");
-const adviceText  = document.getElementById("adviceText");
-const barList     = document.getElementById("barList");
-const flyImg      = document.getElementById("flyImg");
-const bins        = document.getElementById("bins");
+const adviceText = document.getElementById("adviceText");
+const barList = document.getElementById("barList");
+const flyImg = document.getElementById("flyImg");
+const bins = document.getElementById("bins");
+const correctBtn = document.getElementById("correctBtn");
+const correctPanel = document.getElementById("correctPanel");
+const catChips = document.getElementById("catChips");
+const correctionNote = document.getElementById("correctionNote");
+const submitCorrectionBtn = document.getElementById("submitCorrectionBtn");
+const cancelCorrectionBtn = document.getElementById("cancelCorrectionBtn");
+const correctionMsg = document.getElementById("correctionMsg");
+const historyPanel = document.getElementById("historyPanel");
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-let currentFile = null;       // 当前选中的图片文件
-let currentObjectUrl = null;  // 预览用的 object URL，便于释放
+let currentFile = null;
+let currentObjectUrl = null;
+let currentResult = null;
+let selectedCorrectionClass = "";
+let activeHistoryId = "";
 
-// ===== 文件选择 / 拖拽 =====
+initCorrectionChips();
+renderHistory();
+
 dropZone.addEventListener("click", () => fileInput.click());
-dropZone.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+dropZone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    fileInput.click();
+  }
 });
+
 fileInput.addEventListener("change", () => {
   if (fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
 });
 
-["dragenter", "dragover"].forEach((ev) =>
-  dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add("dragover"); })
-);
-["dragleave", "drop"].forEach((ev) =>
-  dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove("dragover"); })
-);
-dropZone.addEventListener("drop", (e) => {
-  const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f) handleFile(f);
+["dragenter", "dragover"].forEach((eventName) => {
+  dropZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    dropZone.classList.add("dragover");
+  });
+});
+
+["dragleave", "drop"].forEach((eventName) => {
+  dropZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    dropZone.classList.remove("dragover");
+  });
+});
+
+dropZone.addEventListener("drop", (event) => {
+  const file = event.dataTransfer.files && event.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+resetBtn.addEventListener("click", resetUpload);
+predictBtn.addEventListener("click", predictCurrentFile);
+correctBtn.addEventListener("click", () => {
+  resetCorrectionPanel();
+  correctPanel.hidden = false;
+});
+cancelCorrectionBtn.addEventListener("click", () => {
+  resetCorrectionPanel();
+  correctPanel.hidden = true;
+});
+submitCorrectionBtn.addEventListener("click", submitCorrection);
+clearHistoryBtn.addEventListener("click", () => {
+  saveHistory([]);
+  renderHistory();
 });
 
 function handleFile(file) {
@@ -56,7 +111,12 @@ function handleFile(file) {
     setStatus("请选择图片文件（JPG / PNG）", "error");
     return;
   }
+
   currentFile = file;
+  currentResult = null;
+  activeHistoryId = "";
+  selectedCorrectionClass = "";
+
   if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
   currentObjectUrl = URL.createObjectURL(file);
 
@@ -65,16 +125,20 @@ function handleFile(file) {
   dropPrompt.hidden = true;
   predictBtn.disabled = false;
   resetBtn.hidden = false;
-  setStatus("");
-  // 重新选图时隐藏旧结果与桶状态
   resultPanel.hidden = true;
+  correctPanel.hidden = true;
+  setStatus("");
+  setCorrectionStatus("");
   clearBins();
 }
 
-// ===== 重置 =====
-resetBtn.addEventListener("click", () => {
+function resetUpload() {
   currentFile = null;
-  if (currentObjectUrl) { URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = null; }
+  currentResult = null;
+  activeHistoryId = "";
+  selectedCorrectionClass = "";
+  if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  currentObjectUrl = null;
   fileInput.value = "";
   preview.hidden = true;
   preview.src = "";
@@ -82,67 +146,70 @@ resetBtn.addEventListener("click", () => {
   predictBtn.disabled = true;
   resetBtn.hidden = true;
   resultPanel.hidden = true;
+  correctPanel.hidden = true;
   setStatus("");
+  setCorrectionStatus("");
   clearBins();
-});
+}
 
-// ===== 识别 =====
-predictBtn.addEventListener("click", async () => {
+async function predictCurrentFile() {
   if (!currentFile) return;
+
   predictBtn.disabled = true;
-  setStatus("识别中…", "loading");
+  setStatus("识别中...", "loading");
   clearBins();
   resultPanel.hidden = true;
+  correctPanel.hidden = true;
 
   try {
     const data = USE_MOCK ? await mockPredict() : await realPredict(currentFile);
-    if (!data || !data.ok) {
-      throw new Error((data && data.error) || "识别失败");
-    }
+    if (!data || !data.ok) throw new Error((data && data.error) || "识别失败");
     setStatus("");
-    renderResult(data);
-  } catch (err) {
-    // 真实请求失败 → 自动降级 mock，保证演示不中断
-    console.warn("请求失败，降级到 mock：", err);
+    await renderResult(data);
+  } catch (error) {
+    console.warn("Predict failed, falling back to mock data.", error);
     setStatus("后端未连接，使用演示数据", "loading");
     const data = await mockPredict();
-    renderResult(data);
+    await renderResult(data);
   } finally {
     predictBtn.disabled = false;
   }
-});
+}
 
 async function realPredict(file) {
   const form = new FormData();
   form.append("image", file);
-  const resp = await fetch("/predict", { method: "POST", body: form });
-  // 即使是 400/500，也尝试解析 JSON 拿 error
-  let json;
-  try { json = await resp.json(); } catch { json = null; }
-  if (!resp.ok && !json) throw new Error("HTTP " + resp.status);
+  const response = await fetch("/predict", { method: "POST", body: form });
+  let json = null;
+  try {
+    json = await response.json();
+  } catch {
+    json = null;
+  }
+  if (!response.ok && !json) throw new Error("HTTP " + response.status);
   return json;
 }
 
-// ===== 假数据（符合 CONTRACT 结构）=====
 function mockPredict() {
   return new Promise((resolve) => {
     setTimeout(() => {
       const keys = Object.keys(GROUP_META);
       const hitKey = keys[Math.floor(Math.random() * keys.length)];
-
-      // 给命中类一个高概率，其余随机后归一化
       const raw = {};
-      keys.forEach((k) => { raw[k] = Math.random() * 0.15; });
+      keys.forEach((key) => { raw[key] = Math.random() * 0.15; });
       raw[hitKey] = 0.6 + Math.random() * 0.35;
-      const sum = keys.reduce((s, k) => s + raw[k], 0);
-      const top4 = keys
-        .map((k) => ({ group_cn: GROUP_META[k].cn, group_key: k, prob: raw[k] / sum }))
-        .sort((a, b) => b.prob - a.prob);
 
+      const sum = keys.reduce((total, key) => total + raw[key], 0);
+      const top4 = keys
+        .map((key) => ({ group_cn: GROUP_META[key].cn, group_key: key, prob: raw[key] / sum }))
+        .sort((a, b) => b.prob - a.prob);
       const itemSamples = {
-        recyclable: ["metal", "金属"], kitchen: ["vegetable", "蔬菜"],
-        hazardous: ["battery", "电池"], other: ["papercup", "纸杯"],
+        recyclable: ["plastic", "塑料"],
+        kitchen: ["vegetable", "蔬菜"],
+        hazardous: ["battery", "电池"],
+        other: ["papercup", "纸杯"],
       };
+
       resolve({
         ok: true,
         item_class: itemSamples[hitKey][0],
@@ -153,59 +220,224 @@ function mockPredict() {
         top4,
         advice: GROUP_META[hitKey].advice,
       });
-    }, 600);
+    }, 500);
   });
 }
 
-// ===== 渲染结果 =====
-function renderResult(data) {
-  const key = data.group_key;
+async function renderResult(data) {
+  const key = data.group_key || "other";
   const meta = GROUP_META[key] || GROUP_META.other;
 
+  currentResult = data;
   resultBadge.textContent = data.group_cn || meta.cn;
   resultBadge.style.background = meta.color;
-  confidenceNum.textContent = Math.round((data.confidence || 0) * 100) + "%";
-  itemClassCn.textContent = data.item_class_cn || "—";
+  animateConfidence(data.confidence || 0);
+  itemClassCn.textContent = data.item_class_cn || "-";
   adviceText.textContent = data.advice || meta.advice;
-
   renderBars(data.top4 || []);
   resultPanel.hidden = false;
+  resetCorrectionPanel();
+  correctPanel.hidden = true;
 
-  // 落桶动画：飞向命中桶
+  activeHistoryId = await addHistoryEntry(data);
   flyToBin(key);
 }
 
-// ===== Top-4 条形图 =====
 function renderBars(top4) {
   barList.innerHTML = "";
-  top4.forEach((item) => {
+  top4.forEach((item, index) => {
     const meta = GROUP_META[item.group_key] || GROUP_META.other;
     const pct = Math.round(item.prob * 100);
-
     const row = document.createElement("div");
     row.className = "bar-row";
     row.innerHTML = `
-      <span class="bar-name">${item.group_cn}</span>
+      <span class="bar-name">${escapeHTML(item.group_cn || meta.cn)}</span>
       <div class="bar-track"><div class="bar-fill"></div></div>
       <span class="bar-val">${pct}%</span>`;
     const fill = row.querySelector(".bar-fill");
     fill.style.background = meta.color;
+    fill.style.transitionDelay = `${index * 70}ms`;
     barList.appendChild(row);
-    // 下一帧再设宽度，触发过渡动画
     requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = pct + "%"; }));
   });
 }
 
-// ===== 落桶动画 =====
+function initCorrectionChips() {
+  catChips.innerHTML = "";
+  Object.entries(CLASS_CN).forEach(([className, label]) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "cat-chip";
+    chip.dataset.className = className;
+    chip.textContent = label;
+    chip.addEventListener("click", () => selectCorrectionClass(className));
+    catChips.appendChild(chip);
+  });
+}
+
+function selectCorrectionClass(className) {
+  selectedCorrectionClass = className;
+  catChips.querySelectorAll(".cat-chip").forEach((chip) => {
+    chip.classList.toggle("active", chip.dataset.className === className);
+  });
+  submitCorrectionBtn.disabled = false;
+  setCorrectionStatus("");
+}
+
+function resetCorrectionPanel() {
+  selectedCorrectionClass = "";
+  correctionNote.value = "";
+  submitCorrectionBtn.disabled = true;
+  catChips.querySelectorAll(".cat-chip").forEach((chip) => chip.classList.remove("active"));
+  setCorrectionStatus("");
+}
+
+async function submitCorrection() {
+  if (!currentFile || !currentResult || !selectedCorrectionClass) return;
+
+  submitCorrectionBtn.disabled = true;
+  setCorrectionStatus("正在保存纠错样本...", "loading");
+
+  const payload = new FormData();
+  payload.append("image", currentFile);
+  payload.append("correct_class", selectedCorrectionClass);
+  payload.append("note", correctionNote.value.trim());
+  payload.append("orig_class", currentResult.item_class || "");
+  payload.append("orig_group", currentResult.group || currentResult.group_key || "");
+
+  try {
+    const response = await fetch("/feedback", { method: "POST", body: payload });
+    const json = await response.json();
+    if (!response.ok || !json.ok) throw new Error((json && json.error) || "保存失败");
+    markHistoryCorrected(activeHistoryId, selectedCorrectionClass, "saved");
+    setCorrectionStatus("已保存到错例样本库", "success");
+  } catch (error) {
+    console.warn("Feedback save failed; recording locally.", error);
+    markHistoryCorrected(activeHistoryId, selectedCorrectionClass, "local");
+    setCorrectionStatus("后端未连接，已先记录在本地历史", "loading");
+  } finally {
+    correctPanel.hidden = true;
+  }
+}
+
+async function addHistoryEntry(data) {
+  const history = loadHistory();
+  const id = String(Date.now());
+  const thumb = currentFile ? await createThumbnail(currentFile) : "";
+  const entry = {
+    id,
+    ts: new Date().toISOString(),
+    thumb,
+    group_key: data.group_key || "other",
+    group_cn: data.group_cn || (GROUP_META[data.group_key] || GROUP_META.other).cn,
+    item_class: data.item_class || "",
+    item_class_cn: data.item_class_cn || "-",
+    confidence: Number(data.confidence || 0),
+    corrected: false,
+    corrected_class: "",
+    corrected_class_cn: "",
+    correction_status: "",
+  };
+  saveHistory([entry, ...history].slice(0, HISTORY_LIMIT));
+  renderHistory();
+  return id;
+}
+
+function markHistoryCorrected(id, className, status) {
+  if (!id) return;
+  const history = loadHistory();
+  const next = history.map((entry) => {
+    if (entry.id !== id) return entry;
+    return {
+      ...entry,
+      corrected: true,
+      corrected_class: className,
+      corrected_class_cn: CLASS_CN[className] || className,
+      correction_status: status,
+    };
+  });
+  saveHistory(next);
+  renderHistory();
+}
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(items) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.warn("Failed to save local history.", error);
+  }
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  historyPanel.hidden = history.length === 0;
+  historyList.innerHTML = "";
+
+  history.forEach((entry) => {
+    const meta = GROUP_META[entry.group_key] || GROUP_META.other;
+    const card = document.createElement("article");
+    card.className = "history-card";
+    card.innerHTML = `
+      <img class="history-thumb" src="${entry.thumb}" alt="" />
+      <div class="history-content">
+        <div class="history-main">
+          <span class="history-group" style="background:${meta.color}">${escapeHTML(entry.group_cn)}</span>
+          <strong>${escapeHTML(entry.item_class_cn || "-")}</strong>
+          <span>${Math.round((entry.confidence || 0) * 100)}%</span>
+        </div>
+        <div class="history-sub">
+          <time>${formatTime(entry.ts)}</time>
+          ${entry.corrected ? `<span class="history-corrected">已纠错为 ${escapeHTML(entry.corrected_class_cn)}</span>` : ""}
+        </div>
+      </div>`;
+    historyList.appendChild(card);
+  });
+}
+
+function createThumbnail(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const size = 96;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      const scale = Math.max(size / img.width, size / img.height);
+      const width = img.width * scale;
+      const height = img.height * scale;
+      const x = (size - width) / 2;
+      const y = (size - height) / 2;
+      ctx.drawImage(img, x, y, width, height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve("");
+    };
+    img.src = url;
+  });
+}
+
 function flyToBin(key) {
   clearBins();
   const targetBin = bins.querySelector(`.bin[data-key="${key}"]`);
   if (!targetBin || !currentObjectUrl) return;
 
-  // 飞行副本起点 = 预览图位置
   const startRect = preview.getBoundingClientRect();
   const binRect = targetBin.getBoundingClientRect();
-
   flyImg.src = currentObjectUrl;
   flyImg.classList.remove("flying");
   flyImg.style.transition = "none";
@@ -217,19 +449,16 @@ function flyToBin(key) {
   flyImg.style.opacity = "1";
   flyImg.style.display = "block";
 
-  // 计算落点：飞到桶口中心，并缩小
   const targetX = binRect.left + binRect.width / 2 - (startRect.left + startRect.width / 2);
   const targetY = binRect.top - (startRect.top + startRect.height / 2);
   const scale = Math.min(0.18, binRect.width / startRect.width);
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
     flyImg.classList.add("flying");
-    flyImg.style.transform =
-      `translate(${targetX}px, ${targetY}px) scale(${scale}) rotate(18deg)`;
+    flyImg.style.transform = `translate(${targetX}px, ${targetY}px) scale(${scale}) rotate(18deg)`;
     flyImg.style.opacity = "0";
   }));
 
-  // 飞行结束后：桶高亮 + 弹跳
   setTimeout(() => {
     flyImg.style.display = "none";
     flyImg.classList.remove("flying");
@@ -239,11 +468,50 @@ function flyToBin(key) {
 }
 
 function clearBins() {
-  bins.querySelectorAll(".bin").forEach((b) => b.classList.remove("active", "bounce"));
+  bins.querySelectorAll(".bin").forEach((bin) => bin.classList.remove("active", "bounce"));
 }
 
-// ===== 工具 =====
-function setStatus(msg, type) {
-  statusMsg.textContent = msg || "";
+function animateConfidence(confidence) {
+  const target = Math.round(confidence * 100);
+  const start = performance.now();
+  const duration = 650;
+
+  function tick(now) {
+    const progress = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    confidenceNum.textContent = Math.round(target * eased) + "%";
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function setStatus(message, type) {
+  statusMsg.textContent = message || "";
   statusMsg.className = "status-msg" + (type ? " " + type : "");
+}
+
+function setCorrectionStatus(message, type) {
+  correctionMsg.textContent = message || "";
+  correctionMsg.className = "status-msg" + (type ? " " + type : "");
+}
+
+function formatTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
