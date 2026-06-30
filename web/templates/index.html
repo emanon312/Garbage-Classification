@@ -3,26 +3,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智能垃圾分类</title>
+  <title>智能垃圾分类 — AI 图像识别课程项目</title>
+  <meta name="description" content="基于深度学习的智能垃圾分类系统，上传图片即可识别垃圾类别，支持纠错反馈与学习统计" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
+  <!-- 飞入垃圾桶的动画图片（JS 控制） -->
   <img id="flyImg" class="fly-img" alt="" />
 
+  <!-- 顶部导航栏 -->
+  <nav class="top-nav" role="navigation" aria-label="主导航">
+    <a href="/" class="nav-brand">
+      <span class="nav-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+        </svg>
+      </span>
+      EcoSort
+    </a>
+    <div class="nav-links">
+      <a href="#upload">识别</a>
+      <a href="#samples">体验</a>
+      <a href="#history">历史</a>
+    </div>
+  </nav>
+
+  <!-- Hero 首屏 -->
   <header class="hero">
-    <div class="hero-logo">AI</div>
-    <h1>智能垃圾分类</h1>
-    <p class="subtitle">上传图片，识别垃圾类别，记录结果并沉淀错例样本</p>
+    <!-- 装饰性浮动圆（纯 CSS 动画） -->
+    <div class="hero-decor hero-decor-1" aria-hidden="true"></div>
+    <div class="hero-decor hero-decor-2" aria-hidden="true"></div>
+    <div class="hero-decor hero-decor-3" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        MobileNet V3 · 课程设计
+      </div>
+      <h1>智能<span class="hero-title-accent">垃圾分类</span></h1>
+      <p class="subtitle">基于深度学习的图像分类系统，上传一张垃圾图片，<br/>AI 自动识别类别并给出投放建议</p>
+
+      <!-- 特性标签 -->
+      <div class="hero-features">
+        <span class="hero-feature">
+          <span class="hero-feature-dot" style="background: var(--recyclable)"></span>
+          四大类识别
+        </span>
+        <span class="hero-feature">
+          <span class="hero-feature-dot" style="background: var(--kitchen)"></span>
+          置信度分析
+        </span>
+        <span class="hero-feature">
+          <span class="hero-feature-dot" style="background: var(--accent)"></span>
+          纠错反馈
+        </span>
+      </div>
+    </div>
+
+    <!-- 滚动提示 -->
+    <a href="#upload" class="hero-scroll-hint" aria-label="向下滚动">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 13l5 5 5-5"/><path d="M12 18V6"/></svg>
+      向下开始体验
+    </a>
   </header>
 
+  <!-- 主内容区 -->
   <main class="container">
-    <section class="panel upload-panel" aria-label="图片上传">
+
+    <!-- 上传识别面板 -->
+    <section class="panel upload-panel" id="upload" aria-label="图片上传">
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
         <input id="fileInput" type="file" accept="image/*" hidden />
         <div id="dropPrompt" class="drop-prompt">
-          <div class="drop-icon">IMG</div>
+          <svg class="drop-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <rect x="6" y="10" width="36" height="28" rx="3" stroke="currentColor" stroke-width="2.2"/>
+            <circle cx="17" cy="21" r="3" fill="currentColor" opacity=".35"/>
+            <path d="M6 32l10-10 8 8 6-6 12 12" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+          </svg>
           <p class="drop-title">点击选择或拖拽图片到此处</p>
-          <p class="drop-hint">支持 JPG / PNG</p>
+          <p class="drop-hint">支持 JPG / PNG，图片仅在浏览器端处理</p>
         </div>
         <img id="preview" class="preview" alt="预览图" hidden />
       </div>
@@ -33,6 +92,31 @@
       <p id="statusMsg" class="status-msg" aria-live="polite"></p>
     </section>
 
+    <!-- 快速体验（示例图片） -->
+    <section class="panel samples-panel" id="samples" aria-label="快速体验">
+      <h2 class="samples-title">快速体验</h2>
+      <p class="samples-hint">没有图片？点击下方示例图片试试</p>
+      <div class="samples-grid">
+        <button class="sample-card" data-src="/static/samples/香蕉皮1.png" aria-label="识别香蕉皮">
+          <div class="sample-thumb"><img src="/static/samples/香蕉皮1.png" alt="" /></div>
+          <span>香蕉皮</span>
+        </button>
+        <button class="sample-card" data-src="/static/samples/灯泡1.png" aria-label="识别灯泡">
+          <div class="sample-thumb"><img src="/static/samples/灯泡1.png" alt="" /></div>
+          <span>灯泡</span>
+        </button>
+        <button class="sample-card" data-src="/static/samples/cardboard157.jpg" aria-label="识别纸板">
+          <div class="sample-thumb"><img src="/static/samples/cardboard157.jpg" alt="" /></div>
+          <span>纸板</span>
+        </button>
+        <button class="sample-card" data-src="/static/samples/battery.jpg" aria-label="识别电池">
+          <div class="sample-thumb"><img src="/static/samples/battery.jpg" alt="" /></div>
+          <span>电池</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 识别结果（初始隐藏，JS 填充后显示） -->
     <section id="resultPanel" class="panel result-panel" hidden aria-label="识别结果">
       <div class="result-head">
         <div id="resultBadge" class="result-badge">其他垃圾</div>
@@ -49,54 +133,114 @@
       <p id="adviceText" class="advice-text">-</p>
 
       <div class="bars">
-        <h3 class="bars-title">四大类概率</h3>
+        <h3 class="bars-title">四大类概率分布</h3>
         <div id="barList" class="bar-list"></div>
       </div>
 
-      <div class="correct-actions">
-        <button id="correctBtn" class="btn btn-warn" type="button">分类错了</button>
-      </div>
-
-      <div id="correctPanel" class="correct-panel" hidden>
-        <div class="correct-panel-head">
-          <h3>纠正分类</h3>
-          <p>选择正确小类，图片会按小类落盘，后续可并入训练集。</p>
+      <div id="knowledgeCard" class="knowledge-card" hidden>
+        <h3 class="knowledge-title">分类小知识</h3>
+        <div class="knowledge-grid">
+          <div class="knowledge-item">
+            <span class="knowledge-label">处理建议</span>
+            <span id="knowledgeTip" class="knowledge-value">-</span>
+          </div>
+          <div class="knowledge-item">
+            <span class="knowledge-label">降解时间</span>
+            <span id="knowledgeDecompose" class="knowledge-value">-</span>
+          </div>
+          <div class="knowledge-item knowledge-item-wide">
+            <span class="knowledge-label">补充说明</span>
+            <span id="knowledgeNote" class="knowledge-value">-</span>
+          </div>
         </div>
-        <div id="catChips" class="cat-chips" role="listbox" aria-label="正确小类"></div>
-        <label class="note-label" for="correctionNote">备注</label>
-        <textarea id="correctionNote" class="note-input" rows="3" maxlength="500" placeholder="例如：这是饮料瓶，应该归为塑料"></textarea>
-        <div class="correct-panel-actions">
-          <button id="submitCorrectionBtn" class="btn btn-primary" type="button" disabled>提交纠错</button>
-          <button id="cancelCorrectionBtn" class="btn btn-ghost" type="button">取消</button>
-        </div>
-        <p id="correctionMsg" class="status-msg" aria-live="polite"></p>
       </div>
     </section>
 
+    <!-- 识别历史 -->
     <section id="historyPanel" class="panel history-panel" hidden aria-label="识别历史">
       <div class="history-head">
         <div>
           <h2>识别历史</h2>
-          <p>保存在当前浏览器，刷新后仍可查看。</p>
+          <p>保存在当前浏览器，刷新后仍可查看</p>
         </div>
         <button id="clearHistoryBtn" class="btn btn-ghost btn-small" type="button">清空</button>
       </div>
       <div id="historyList" class="history-list"></div>
     </section>
+
+    <!-- 识别统计 -->
+    <section id="statsPanel" class="panel stats-panel" hidden aria-label="识别统计">
+      <h2 class="stats-title">我的分类统计</h2>
+      <div class="stats-summary">
+        <div class="stats-num">
+          <span id="statsTotal" class="stats-big">0</span>
+          <span class="stats-label">总识别次数</span>
+        </div>
+        <div class="stats-num">
+          <span id="statsCorrected" class="stats-big">0</span>
+          <span class="stats-label">已纠错</span>
+        </div>
+      </div>
+      <h3 class="stats-chart-title">四大类分布</h3>
+      <div id="statsBars" class="stats-bars"></div>
+    </section>
   </main>
 
+  <!-- 浮动纠错按钮 -->
+  <button id="correctBtn" class="fab-correct" type="button" title="纠正分类" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    <span>纠错</span>
+  </button>
+
+  <!-- 纠错弹窗 -->
+  <div id="correctOverlay" class="correct-overlay" hidden>
+    <div id="correctPanel" class="correct-panel correct-dialog" role="dialog" aria-label="纠正分类">
+      <div class="correct-panel-head">
+        <h3>纠正分类</h3>
+        <p>选择正确小类，图片会按小类落盘，后续可并入训练集</p>
+      </div>
+      <div id="catChips" class="cat-chips" role="listbox" aria-label="正确小类"></div>
+      <label class="note-label" for="correctionNote">备注</label>
+      <textarea id="correctionNote" class="note-input" rows="3" maxlength="500" placeholder="例如：这是饮料瓶，应该归为塑料"></textarea>
+      <div class="correct-panel-actions">
+        <button id="submitCorrectionBtn" class="btn btn-primary" type="button" disabled>提交纠错</button>
+        <button id="cancelCorrectionBtn" class="btn btn-ghost" type="button">取消</button>
+      </div>
+      <p id="correctionMsg" class="status-msg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- Loading 覆盖层 -->
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="spinner"></div>
+    <p id="loadingText" class="loading-text">识别中…</p>
+  </div>
+
+  <!-- 底部垃圾桶装饰 -->
   <footer class="bins" id="bins">
     <div class="bin" data-key="recyclable">
-      <div class="bin-body"><span class="bin-label">可回收物</span></div>
+      <div class="bin-body">
+        <span class="bin-icon">♻️</span>
+        <span class="bin-label">可回收物</span>
+      </div>
     </div>
     <div class="bin" data-key="kitchen">
-      <div class="bin-body"><span class="bin-label">厨余垃圾</span></div>
+      <div class="bin-body">
+        <span class="bin-icon">🦴</span>
+        <span class="bin-label">厨余垃圾</span>
+      </div>
     </div>
     <div class="bin" data-key="hazardous">
-      <div class="bin-body"><span class="bin-label">有害垃圾</span></div>
+      <div class="bin-body">
+        <span class="bin-icon">☣️</span>
+        <span class="bin-label">有害垃圾</span>
+      </div>
     </div>
     <div class="bin" data-key="other">
-      <div class="bin-body"><span class="bin-label">其他垃圾</span></div>
+      <div class="bin-body">
+        <span class="bin-icon">🗑️</span>
+        <span class="bin-label">其他垃圾</span>
+      </div>
     </div>
   </footer>
 

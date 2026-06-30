@@ -39,6 +39,12 @@ def test_frontend_wires_history_and_feedback_behaviors():
         'fetch("/feedback"',
         "renderHistory",
         "markHistoryCorrected",
+        "healthCheck",
+        "backendOnline",
+        "flyingLock",
+        "closeCorrection",
+        "correctOverlay",
+        "loadingOverlay",
     ]
 
     missing = [item for item in required_snippets if item not in js]
@@ -49,13 +55,18 @@ def test_styles_cover_new_interactive_sections():
     css = read_text("static/style.css")
 
     required_selectors = [
-        ".correct-actions",
+        ".fab-correct",
+        ".correct-overlay",
+        ".correct-dialog",
         ".correct-panel",
         ".cat-chips",
         ".cat-chip",
         ".history-panel",
         ".history-list",
         ".history-card",
+        ".history-empty",
+        ".loading-overlay",
+        ".spinner",
     ]
 
     missing = [item for item in required_selectors if item not in css]

@@ -2,6 +2,24 @@ const USE_MOCK = false;
 const HISTORY_KEY = "garbage-classifier.history.v1";
 const HISTORY_LIMIT = 30;
 
+const TRASH_KNOWLEDGE = {
+  "纸板": { tip: "拆开压扁后投入可回收物桶", decompose: "3-6 个月", note: "干净的纸板可回收，脏污纸板归其他垃圾" },
+  "玻璃": { tip: "清洗后投入可回收物桶，破碎玻璃用报纸包好", decompose: "上千年", note: "有色玻璃与无色玻璃同样回收处理" },
+  "金属": { tip: "清洗干净后投入可回收物桶", decompose: "50-100 年", note: "金属罐可无限次回收利用，节约 95% 能源" },
+  "塑料": { tip: "清洗后投入可回收物桶", decompose: "100-500 年", note: "塑料袋多数属于其他垃圾，硬质塑料容器才可回收" },
+  "衣物": { tip: "投入旧衣回收箱或可回收物桶", decompose: "棉 1-5 年，化纤上百年", note: "可捐赠的衣物建议走捐赠渠道再利用" },
+  "纸张": { tip: "展开铺平后投入可回收物桶", decompose: "3-6 个月", note: "卫生纸、纸巾属于其他垃圾，不可回收" },
+  "香蕉皮": { tip: "投入厨余垃圾桶", decompose: "2-5 周", note: "果皮菜叶属于厨余垃圾，可堆肥处理" },
+  "蔬菜": { tip: "投入厨余垃圾桶", decompose: "2-4 周", note: "厨余垃圾经处理后可用于生产有机肥料" },
+  "电池": { tip: "投入有害垃圾桶或专门电池回收箱", decompose: "上百年，泄漏后污染土壤", note: "含铅汞镉等重金属，严禁随地丢弃" },
+  "灯泡": { tip: "投入有害垃圾桶，破碎灯泡要包好", decompose: "上千年", note: "节能灯含汞，一支可污染 180 吨水，必须单独回收" },
+  "药品": { tip: "投入有害垃圾桶或退回药店回收点", decompose: "污染水源", note: "过期药品不可冲入下水道或丢入生活垃圾桶" },
+  "纸杯": { tip: "投入其他垃圾桶", decompose: "约 50 年", note: "纸杯内壁有聚乙烯塑料膜，无法分离回收" },
+};
+
+let backendOnline = null; // null=未检测, true/false=已检测
+let flyingLock = false;   // 飞入动画防重入
+
 const GROUP_META = {
   recyclable: { cn: "可回收物", color: "#1E88E5", advice: "请投入蓝色可回收物桶" },
   kitchen: { cn: "厨余垃圾", color: "#43A047", advice: "请投入绿色厨余垃圾桶" },
@@ -48,7 +66,19 @@ const cancelCorrectionBtn = document.getElementById("cancelCorrectionBtn");
 const correctionMsg = document.getElementById("correctionMsg");
 const historyPanel = document.getElementById("historyPanel");
 const historyList = document.getElementById("historyList");
+const knowledgeCard = document.getElementById("knowledgeCard");
+const knowledgeTip = document.getElementById("knowledgeTip");
+const knowledgeDecompose = document.getElementById("knowledgeDecompose");
+const knowledgeNote = document.getElementById("knowledgeNote");
+const statsPanel = document.getElementById("statsPanel");
+const statsTotal = document.getElementById("statsTotal");
+const statsCorrected = document.getElementById("statsCorrected");
+const statsBars = document.getElementById("statsBars");
+const sampleCards = document.querySelectorAll(".sample-card");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+const correctOverlay = document.getElementById("correctOverlay");
+const loadingOverlay = document.getElementById("loadingOverlay");
+const loadingText = document.getElementById("loadingText");
 
 let currentFile = null;
 let currentObjectUrl = null;
@@ -58,6 +88,12 @@ let activeHistoryId = "";
 
 initCorrectionChips();
 renderHistory();
+healthCheck();
+
+// 点击纠错遮罩空白处关闭
+correctOverlay.addEventListener("click", (e) => {
+  if (e.target === correctOverlay) closeCorrection();
+});
 
 dropZone.addEventListener("click", () => fileInput.click());
 dropZone.addEventListener("keydown", (event) => {
@@ -94,16 +130,37 @@ resetBtn.addEventListener("click", resetUpload);
 predictBtn.addEventListener("click", predictCurrentFile);
 correctBtn.addEventListener("click", () => {
   resetCorrectionPanel();
-  correctPanel.hidden = false;
+  correctOverlay.hidden = false;
 });
-cancelCorrectionBtn.addEventListener("click", () => {
+cancelCorrectionBtn.addEventListener("click", closeCorrection);
+
+function closeCorrection() {
   resetCorrectionPanel();
-  correctPanel.hidden = true;
-});
+  correctOverlay.hidden = true;
+}
 submitCorrectionBtn.addEventListener("click", submitCorrection);
 clearHistoryBtn.addEventListener("click", () => {
   saveHistory([]);
   renderHistory();
+  renderStats();
+});
+
+sampleCards.forEach((card) => {
+  card.addEventListener("click", async () => {
+    const src = card.dataset.src;
+    if (!src) return;
+    setStatus("正在加载示例图片...", "loading");
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) throw new Error("加载失败");
+      const blob = await resp.blob();
+      const file = new File([blob], src.split("/").pop(), { type: blob.type || "image/png" });
+      handleFile(file);
+      predictCurrentFile();
+    } catch {
+      setStatus("示例图片加载失败", "error");
+    }
+  });
 });
 
 function handleFile(file) {
@@ -126,7 +183,8 @@ function handleFile(file) {
   predictBtn.disabled = false;
   resetBtn.hidden = false;
   resultPanel.hidden = true;
-  correctPanel.hidden = true;
+  correctOverlay.hidden = true;
+  correctBtn.hidden = true;
   setStatus("");
   setCorrectionStatus("");
   clearBins();
@@ -146,7 +204,9 @@ function resetUpload() {
   predictBtn.disabled = true;
   resetBtn.hidden = true;
   resultPanel.hidden = true;
-  correctPanel.hidden = true;
+  correctOverlay.hidden = true;
+  correctBtn.hidden = true;
+  bins.classList.remove("has-result");
   setStatus("");
   setCorrectionStatus("");
   clearBins();
@@ -156,20 +216,29 @@ async function predictCurrentFile() {
   if (!currentFile) return;
 
   predictBtn.disabled = true;
-  setStatus("识别中...", "loading");
+  loadingText.textContent = "识别中…";
+  loadingOverlay.hidden = false;
   clearBins();
   resultPanel.hidden = true;
-  correctPanel.hidden = true;
+  correctOverlay.hidden = true;
+  correctBtn.hidden = true;
 
   try {
-    const data = USE_MOCK ? await mockPredict() : await realPredict(currentFile);
-    if (!data || !data.ok) throw new Error((data && data.error) || "识别失败");
+    let data;
+    if (!USE_MOCK && backendOnline !== false) {
+      data = await realPredict(currentFile);
+      if (!data || !data.ok) throw new Error((data && data.error) || "识别失败");
+    } else {
+      data = await mockPredict();
+    }
     setStatus("");
+    loadingOverlay.hidden = true;
     await renderResult(data);
   } catch (error) {
-    console.warn("Predict failed, falling back to mock data.", error);
-    setStatus("后端未连接，使用演示数据", "loading");
+    console.warn("Predict failed, falling back to mock.", error);
+    loadingText.textContent = "使用演示数据…";
     const data = await mockPredict();
+    loadingOverlay.hidden = true;
     await renderResult(data);
   } finally {
     predictBtn.disabled = false;
@@ -237,9 +306,13 @@ async function renderResult(data) {
   renderBars(data.top4 || []);
   resultPanel.hidden = false;
   resetCorrectionPanel();
-  correctPanel.hidden = true;
+  correctOverlay.hidden = true;
+  correctBtn.hidden = false;
+  bins.classList.add("has-result");
 
   activeHistoryId = await addHistoryEntry(data);
+  renderStats();
+  renderKnowledge(data.item_class_cn);
   flyToBin(key);
 }
 
@@ -316,7 +389,7 @@ async function submitCorrection() {
     markHistoryCorrected(activeHistoryId, selectedCorrectionClass, "local");
     setCorrectionStatus("后端未连接，已先记录在本地历史", "loading");
   } finally {
-    correctPanel.hidden = true;
+    correctOverlay.hidden = true;
   }
 }
 
@@ -380,8 +453,13 @@ function saveHistory(items) {
 
 function renderHistory() {
   const history = loadHistory();
-  historyPanel.hidden = history.length === 0;
+  historyPanel.hidden = false;
   historyList.innerHTML = "";
+
+  if (history.length === 0) {
+    historyList.innerHTML = `<div class="history-empty">暂无识别记录<br>上传图片开始使用</div>`;
+    return;
+  }
 
   history.forEach((entry) => {
     const meta = GROUP_META[entry.group_key] || GROUP_META.other;
@@ -402,6 +480,7 @@ function renderHistory() {
       </div>`;
     historyList.appendChild(card);
   });
+  renderStats();
 }
 
 function createThumbnail(file) {
@@ -432,12 +511,16 @@ function createThumbnail(file) {
 }
 
 function flyToBin(key) {
+  if (flyingLock) return;
+  flyingLock = true;
   clearBins();
   const targetBin = bins.querySelector(`.bin[data-key="${key}"]`);
-  if (!targetBin || !currentObjectUrl) return;
+  if (!targetBin || !currentObjectUrl) { flyingLock = false; return; }
 
   const startRect = preview.getBoundingClientRect();
-  const binRect = targetBin.getBoundingClientRect();
+  const binBody = targetBin.querySelector(".bin-body");
+  const binBodyRect = binBody.getBoundingClientRect();
+
   flyImg.src = currentObjectUrl;
   flyImg.classList.remove("flying");
   flyImg.style.transition = "none";
@@ -449,22 +532,36 @@ function flyToBin(key) {
   flyImg.style.opacity = "1";
   flyImg.style.display = "block";
 
-  const targetX = binRect.left + binRect.width / 2 - (startRect.left + startRect.width / 2);
-  const targetY = binRect.top - (startRect.top + startRect.height / 2);
-  const scale = Math.min(0.18, binRect.width / startRect.width);
+  // 飞到垃圾桶上方（偏上一点，像是悬在桶口）
+  const toX = binBodyRect.left + binBodyRect.width / 2 - (startRect.left + startRect.width / 2);
+  const toY = binBodyRect.top - startRect.top - startRect.height * 0.3;
+  const scale = Math.min(0.22, binBodyRect.width / startRect.width);
+
+  // 阶段 1: 盖子打开 + 图片飞出
+  targetBin.classList.add("catching");
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    flyImg.classList.add("flying");
-    flyImg.style.transform = `translate(${targetX}px, ${targetY}px) scale(${scale}) rotate(18deg)`;
-    flyImg.style.opacity = "0";
+    flyImg.style.transition = "transform .7s cubic-bezier(.35,.05,.55,.95), opacity .7s ease";
+    flyImg.style.transform = `translate(${toX}px, ${toY}px) scale(${scale}) rotate(8deg)`;
+    flyImg.style.opacity = ".9";
   }));
 
+  // 阶段 2: 落入桶内（快速缩小 + 下沉 + 淡出）
+  setTimeout(() => {
+    flyImg.style.transition = "transform .25s cubic-bezier(.7,0,1,.6), opacity .2s ease";
+    flyImg.style.transform = `translate(${toX}px, ${toY + 30}px) scale(0.01) rotate(24deg)`;
+    flyImg.style.opacity = "0";
+    targetBin.classList.remove("catching");
+    targetBin.classList.add("active", "swallow");
+  }, 700);
+
+  // 阶段 3: 弹跳结束，清理
   setTimeout(() => {
     flyImg.style.display = "none";
     flyImg.classList.remove("flying");
-    targetBin.classList.add("active", "bounce");
-    setTimeout(() => targetBin.classList.remove("bounce"), 520);
-  }, 1000);
+    targetBin.classList.remove("swallow");
+    flyingLock = false;
+  }, 1250);
 }
 
 function clearBins() {
@@ -475,6 +572,12 @@ function animateConfidence(confidence) {
   const target = Math.round(confidence * 100);
   const start = performance.now();
   const duration = 650;
+
+  // 应用颜色编码
+  confidenceNum.classList.remove("high", "mid", "low");
+  if (target >= 80) confidenceNum.classList.add("high");
+  else if (target >= 50) confidenceNum.classList.add("mid");
+  else confidenceNum.classList.add("low");
 
   function tick(now) {
     const progress = Math.min(1, (now - start) / duration);
@@ -514,4 +617,66 @@ function escapeHTML(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function renderKnowledge(itemClassCn) {
+  const info = TRASH_KNOWLEDGE[itemClassCn];
+  if (!info) {
+    knowledgeCard.hidden = true;
+    return;
+  }
+  knowledgeTip.textContent = info.tip;
+  knowledgeDecompose.textContent = info.decompose;
+  knowledgeNote.textContent = info.note;
+  knowledgeCard.hidden = false;
+}
+
+function renderStats() {
+  const history = loadHistory();
+  statsPanel.hidden = history.length === 0;
+
+  statsTotal.textContent = history.length;
+  statsCorrected.textContent = history.filter((e) => e.corrected).length;
+
+  const groupCount = { recyclable: 0, kitchen: 0, hazardous: 0, other: 0 };
+  history.forEach((entry) => {
+    const key = entry.group_key || "other";
+    if (groupCount[key] !== undefined) groupCount[key]++;
+  });
+
+  const total = history.length || 1;
+  const entries = Object.entries(groupCount);
+  entries.sort((a, b) => b[1] - a[1]);
+
+  statsBars.innerHTML = "";
+  entries.forEach(([key, count]) => {
+    const meta = GROUP_META[key] || GROUP_META.other;
+    const pct = Math.round((count / total) * 100);
+    const row = document.createElement("div");
+    row.className = "stats-bar-row";
+    row.innerHTML = `
+      <span class="stats-bar-name">${escapeHTML(meta.cn)}</span>
+      <div class="stats-bar-track"><div class="stats-bar-fill"></div></div>
+      <span class="stats-bar-val">${pct}%</span>`;
+    const fill = row.querySelector(".stats-bar-fill");
+    fill.style.background = meta.color;
+    requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = pct + "%"; }));
+    statsBars.appendChild(row);
+  });
+}
+
+async function healthCheck() {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const resp = await fetch("/", { method: "HEAD", signal: controller.signal });
+    clearTimeout(timeout);
+    backendOnline = resp.ok;
+  } catch {
+    backendOnline = false;
+  }
+  if (!backendOnline) {
+    setStatus("后端未连接，使用演示模式", "loading");
+    renderStats();
+  }
 }
