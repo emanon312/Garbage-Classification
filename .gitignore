@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local datasets copied from the upstream course project.
+/TrashBig/
+/Code/TrashBig/
+
+# Local correction samples collected during demos/retraining.
+/web/feedback/*
+!/web/feedback/.gitkeep
+
+# Training logs and generated artifacts.
+/Code/checkpoint/exp3/
+
+# Private presentation and working materials.
+/slides/
+/docs/
+/.agent-team/
+/.frontend-slides/
+/test_img/
+
+# Local/editor noise
+.DS_Store
+Thumbs.db

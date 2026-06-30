@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能垃圾分类</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- 飞行中的图片副本，识别后从预览位飞向命中垃圾桶 -->
+  <img id="flyImg" class="fly-img" alt="" />
+
+  <header class="hero">
+    <div class="hero-logo">♻</div>
+    <h1>智能垃圾分类</h1>
+    <p class="subtitle">上传一张图片，AI 帮你判断该投哪个桶</p>
+  </header>
+
+  <main class="container">
+    <!-- 上传区 -->
+    <section class="panel upload-panel">
+      <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
+        <input id="fileInput" type="file" accept="image/*" hidden />
+        <div id="dropPrompt" class="drop-prompt">
+          <div class="drop-icon">📷</div>
+          <p class="drop-title">点击选择 或 拖拽图片到此处</p>
+          <p class="drop-hint">支持 JPG / PNG</p>
+        </div>
+        <img id="preview" class="preview" alt="预览图" hidden />
+      </div>
+      <div class="actions">
+        <button id="predictBtn" class="btn btn-primary" disabled>开始识别</button>
+        <button id="resetBtn" class="btn btn-ghost" hidden>重新上传</button>
+      </div>
+      <p id="statusMsg" class="status-msg"></p>
+    </section>
+
+    <!-- 结果区 -->
+    <section id="resultPanel" class="panel result-panel" hidden>
+      <div class="result-head">
+        <div id="resultBadge" class="result-badge">可回收物</div>
+        <div class="result-meta">
+          <div class="confidence">
+            <span id="confidenceNum" class="confidence-num">0%</span>
+            <span class="confidence-label">置信度</span>
+          </div>
+          <div class="item-class">
+            小类：<span id="itemClassCn">—</span>
+          </div>
+        </div>
+      </div>
+      <p id="adviceText" class="advice-text">—</p>
+
+      <!-- Top-4 条形图 -->
+      <div class="bars">
+        <h3 class="bars-title">四大类概率</h3>
+        <div id="barList" class="bar-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部四垃圾桶 -->
+  <footer class="bins" id="bins">
+    <div class="bin" data-key="recyclable">
+      <div class="bin-body"><span class="bin-label">可回收物</span></div>
+    </div>
+    <div class="bin" data-key="kitchen">
+      <div class="bin-body"><span class="bin-label">厨余垃圾</span></div>
+    </div>
+    <div class="bin" data-key="hazardous">
+      <div class="bin-body"><span class="bin-label">有害垃圾</span></div>
+    </div>
+    <div class="bin" data-key="other">
+      <div class="bin-body"><span class="bin-label">其他垃圾</span></div>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
