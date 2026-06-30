@@ -4,14 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>智能垃圾分类 — AI 图像识别课程项目</title>
-  <meta name="description" content="基于深度学习的智能垃圾分类系统，上传图片即可识别垃圾类别，支持纠错反馈与学习统计" />
+  <meta name="description" content="基于深度学习 MobileNetV3 的智能垃圾分类系统，上传图片即可识别四大类垃圾并给出投放建议，课程设计落地页" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <!-- 飞入垃圾桶的动画图片（JS 控制） -->
   <img id="flyImg" class="fly-img" alt="" />
 
-  <!-- 顶部导航栏 -->
+  <!-- 顶部导航 -->
   <nav class="top-nav" role="navigation" aria-label="主导航">
     <a href="/" class="nav-brand">
       <span class="nav-mark">
@@ -23,54 +22,82 @@
     </a>
     <div class="nav-links">
       <a href="#upload">识别</a>
+      <a href="#flow">流程</a>
       <a href="#samples">体验</a>
+      <a href="#wiki">百科</a>
       <a href="#history">历史</a>
     </div>
   </nav>
 
-  <!-- Hero 首屏 -->
+  <!-- Hero · 两栏布局 -->
   <header class="hero">
-    <!-- 装饰性浮动圆（纯 CSS 动画） -->
     <div class="hero-decor hero-decor-1" aria-hidden="true"></div>
     <div class="hero-decor hero-decor-2" aria-hidden="true"></div>
     <div class="hero-decor hero-decor-3" aria-hidden="true"></div>
 
-    <div class="hero-content">
-      <div class="hero-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        MobileNet V3 · 课程设计
-      </div>
-      <h1>智能<span class="hero-title-accent">垃圾分类</span></h1>
-      <p class="subtitle">基于深度学习的图像分类系统，上传一张垃圾图片，<br/>AI 自动识别类别并给出投放建议</p>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          MobileNetV3 · 大数据实训课程
+        </div>
+        <h1>智能<span class="hero-title-accent">垃圾分类</span></h1>
+        <p class="subtitle">拍一张照、AI 自动识别 · 深度学习四分类图像识别系统</p>
 
-      <!-- 特性标签 -->
-      <div class="hero-features">
-        <span class="hero-feature">
-          <span class="hero-feature-dot" style="background: var(--recyclable)"></span>
-          四大类识别
-        </span>
-        <span class="hero-feature">
-          <span class="hero-feature-dot" style="background: var(--kitchen)"></span>
-          置信度分析
-        </span>
-        <span class="hero-feature">
-          <span class="hero-feature-dot" style="background: var(--accent)"></span>
-          纠错反馈
-        </span>
+        <div class="hero-features">
+          <span class="hero-feature">
+            <span class="hero-feature-dot" style="background: var(--recyclable)"></span>
+            四大类识别
+          </span>
+          <span class="hero-feature">
+            <span class="hero-feature-dot" style="background: var(--kitchen)"></span>
+            置信度分析
+          </span>
+          <span class="hero-feature">
+            <span class="hero-feature-dot" style="background: var(--accent)"></span>
+            纠错反馈
+          </span>
+        </div>
+      </div>
+
+      <!-- Hero 右侧：分类示意图（A 选项补充） -->
+      <div class="hero-illust" aria-hidden="true">
+        <div class="classify-diagram">
+          <div class="bin-tile" data-group="recyclable">
+            <span class="bin-tile-icon">♻️</span>
+            <span class="bin-tile-name">可回收物</span>
+          </div>
+          <div class="bin-tile" data-group="kitchen">
+            <span class="bin-tile-icon">🥬</span>
+            <span class="bin-tile-name">厨余垃圾</span>
+          </div>
+          <div class="bin-tile" data-group="hazardous">
+            <span class="bin-tile-icon">☢️</span>
+            <span class="bin-tile-name">有害垃圾</span>
+          </div>
+          <div class="bin-tile" data-group="other">
+            <span class="bin-tile-icon">🗑️</span>
+            <span class="bin-tile-name">其他垃圾</span>
+          </div>
+        </div>
+        <!-- 漂浮小图标 -->
+        <div class="hero-illust-float f1">🔋</div>
+        <div class="hero-illust-float f2">🍌</div>
+        <div class="hero-illust-float f3">📦</div>
+        <div class="hero-illust-float f4">💡</div>
       </div>
     </div>
 
-    <!-- 滚动提示 -->
     <a href="#upload" class="hero-scroll-hint" aria-label="向下滚动">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 13l5 5 5-5"/><path d="M12 18V6"/></svg>
-      向下开始体验
+      开始体验
     </a>
   </header>
 
-  <!-- 主内容区 -->
+  <!-- 主内容区（加宽到 1120px） -->
   <main class="container">
 
-    <!-- 上传识别面板 -->
+    <!-- 上传面板 -->
     <section class="panel upload-panel" id="upload" aria-label="图片上传">
       <div id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
         <input id="fileInput" type="file" accept="image/*" hidden />
@@ -92,7 +119,7 @@
       <p id="statusMsg" class="status-msg" aria-live="polite"></p>
     </section>
 
-    <!-- 快速体验（示例图片） -->
+    <!-- 快速体验 -->
     <section class="panel samples-panel" id="samples" aria-label="快速体验">
       <h2 class="samples-title">快速体验</h2>
       <p class="samples-hint">没有图片？点击下方示例图片试试</p>
@@ -116,7 +143,7 @@
       </div>
     </section>
 
-    <!-- 识别结果（初始隐藏，JS 填充后显示） -->
+    <!-- 识别结果 -->
     <section id="resultPanel" class="panel result-panel" hidden aria-label="识别结果">
       <div class="result-head">
         <div id="resultBadge" class="result-badge">其他垃圾</div>
@@ -125,18 +152,14 @@
             <span id="confidenceNum" class="confidence-num">0%</span>
             <span class="confidence-label">置信度</span>
           </div>
-          <div class="item-class">
-            小类：<span id="itemClassCn">-</span>
-          </div>
+          <div class="item-class">小类：<span id="itemClassCn">-</span></div>
         </div>
       </div>
       <p id="adviceText" class="advice-text">-</p>
-
       <div class="bars">
         <h3 class="bars-title">四大类概率分布</h3>
         <div id="barList" class="bar-list"></div>
       </div>
-
       <div id="knowledgeCard" class="knowledge-card" hidden>
         <h3 class="knowledge-title">分类小知识</h3>
         <div class="knowledge-grid">
@@ -186,6 +209,139 @@
     </section>
   </main>
 
+  <!-- ============================================================
+       新增 · 工作流程图（深色大段）
+       ============================================================ -->
+  <section class="flow-section" id="flow" aria-label="系统工作流程">
+    <div class="flow-section-inner">
+      <div class="flow-eyebrow">System Workflow</div>
+      <h2 class="flow-heading">五步完成一次<span class="em">智能识别</span></h2>
+      <p class="flow-sub">从上传图片到落桶动画，全流程端到端，无需等待、无需训练。</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <span class="flow-step-no">1</span>
+          <div class="flow-step-icon">📷</div>
+          <div class="flow-step-title">拍照 / 上传</div>
+          <div class="flow-step-desc">对准待识别的垃圾，拍摄一张清晰照片或直接上传</div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-no">2</span>
+          <div class="flow-step-icon">🚀</div>
+          <div class="flow-step-title">发送给 Flask</div>
+          <div class="flow-step-desc">前端通过 <code>/predict</code> 接口把图片字节传给后端</div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-no">3</span>
+          <div class="flow-step-icon">🧠</div>
+          <div class="flow-step-title">CNN 推理</div>
+          <div class="flow-step-desc">MobileNetV3 抽取 12 小类概率，再汇总成四大类</div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-no">4</span>
+          <div class="flow-step-icon">📊</div>
+          <div class="flow-step-title">结果可视化</div>
+          <div class="flow-step-desc">置信度、Top-4 概率条、投放建议一并呈现</div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step-no">5</span>
+          <div class="flow-step-icon">🗑️</div>
+          <div class="flow-step-title">落桶动画</div>
+          <div class="flow-step-desc">图片按颜色飞向对应垃圾桶，并触发高亮 / 盖子动画</div>
+        </div>
+      </div>
+
+      <p class="flow-note">
+        🔁 <b>纠错闭环</b>：如果识别错了，点击右上「纠错」按钮可提交正确小类，样本会落盘到 <code>feedback/</code> 目录，
+        后续可并入训练集做增量学习——这是整个项目中 <b>最有工程价值</b> 的一环。
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       新增 · 分类小百科
+       ============================================================ -->
+  <section class="wiki-section" id="wiki" aria-label="垃圾分类小百科">
+    <div class="wiki-section-header">
+      <div class="wiki-eyebrow">Classification Wiki</div>
+      <h2 class="wiki-heading">认识四大类垃圾</h2>
+      <p class="wiki-sub">每一类都列出了典型物品与投放要点，识别结果出来前就能心中有数。</p>
+    </div>
+    <div class="wiki-grid">
+      <!-- 可回收物 -->
+      <article class="wiki-group" data-group="recyclable">
+        <div class="wiki-group-top">
+          <span class="wiki-swatch"></span>
+          <span class="wiki-group-name">可回收物</span>
+          <span class="wiki-group-tag">蓝色桶</span>
+        </div>
+        <ul class="wiki-items">
+          <li class="wiki-item"><span class="wiki-item-icon">📦</span><span class="wiki-item-name">纸板</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🥛</span><span class="wiki-item-name">玻璃</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🥫</span><span class="wiki-item-name">金属</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🧴</span><span class="wiki-item-name">塑料</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">👕</span><span class="wiki-item-name">衣物</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">📄</span><span class="wiki-item-name">纸张</span></li>
+        </ul>
+        <p class="wiki-group-advice">投蓝桶前请清洗、压扁；纸巾属于其他垃圾</p>
+      </article>
+
+      <!-- 厨余垃圾 -->
+      <article class="wiki-group" data-group="kitchen">
+        <div class="wiki-group-top">
+          <span class="wiki-swatch"></span>
+          <span class="wiki-group-name">厨余垃圾</span>
+          <span class="wiki-group-tag">绿色桶</span>
+        </div>
+        <ul class="wiki-items">
+          <li class="wiki-item"><span class="wiki-item-icon">🍌</span><span class="wiki-item-name">香蕉皮</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🥬</span><span class="wiki-item-name">蔬菜</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🍚</span><span class="wiki-item-name">剩饭剩菜</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🍎</span><span class="wiki-item-name">果皮果核</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🥚</span><span class="wiki-item-name">蛋壳</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🌽</span><span class="wiki-item-name">玉米芯</span></li>
+        </ul>
+        <p class="wiki-group-advice">沥干水分投放；大骨头归其他垃圾</p>
+      </article>
+
+      <!-- 有害垃圾 -->
+      <article class="wiki-group" data-group="hazardous">
+        <div class="wiki-group-top">
+          <span class="wiki-swatch"></span>
+          <span class="wiki-group-name">有害垃圾</span>
+          <span class="wiki-group-tag">红色桶</span>
+        </div>
+        <ul class="wiki-items">
+          <li class="wiki-item"><span class="wiki-item-icon">🔋</span><span class="wiki-item-name">电池</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">💡</span><span class="wiki-item-name">灯泡</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">💊</span><span class="wiki-item-name">过期药品</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🎨</span><span class="wiki-item-name">油漆</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🌡️</span><span class="wiki-item-name">水银温度计</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🔌</span><span class="wiki-item-name">荧光灯管</span></li>
+        </ul>
+        <p class="wiki-group-advice">轻拿轻放，防止破裂泄漏，一支节能灯可污染 180 吨水</p>
+      </article>
+
+      <!-- 其他垃圾 -->
+      <article class="wiki-group" data-group="other">
+        <div class="wiki-group-top">
+          <span class="wiki-swatch"></span>
+          <span class="wiki-group-name">其他垃圾</span>
+          <span class="wiki-group-tag">灰色桶</span>
+        </div>
+        <ul class="wiki-items">
+          <li class="wiki-item"><span class="wiki-item-icon">🥤</span><span class="wiki-item-name">纸杯</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🧻</span><span class="wiki-item-name">纸巾</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🍬</span><span class="wiki-item-name">糖纸</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🍱</span><span class="wiki-item-name">一次性餐具</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🚬</span><span class="wiki-item-name">烟头</span></li>
+          <li class="wiki-item"><span class="wiki-item-icon">🦴</span><span class="wiki-item-name">大骨头</span></li>
+        </ul>
+        <p class="wiki-group-advice">难以回收、已污染的一次性用品基本归这里</p>
+      </article>
+    </div>
+  </section>
+
   <!-- 浮动纠错按钮 -->
   <button id="correctBtn" class="fab-correct" type="button" title="纠正分类" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -210,37 +366,71 @@
     </div>
   </div>
 
-  <!-- Loading 覆盖层 -->
+  <!-- Loading -->
   <div id="loadingOverlay" class="loading-overlay" hidden>
     <div class="spinner"></div>
     <p id="loadingText" class="loading-text">识别中…</p>
   </div>
 
-  <!-- 底部垃圾桶装饰 -->
-  <footer class="bins" id="bins">
-    <div class="bin" data-key="recyclable">
-      <div class="bin-body">
-        <span class="bin-icon">♻️</span>
-        <span class="bin-label">可回收物</span>
+  <!-- ============================================================
+       新增 · 深色 Footer：项目信息 + 团队 + 内嵌垃圾桶
+       ============================================================ -->
+  <footer class="site-footer" id="about">
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-brand">
+          <span class="footer-brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></span>
+          <span class="footer-brand-name">EcoSort · 智能垃圾分类</span>
+        </div>
+        <p>基于 <b>MobileNetV3-Small</b> 的 12 小类 CNN 推理引擎，按国内标准汇总为四大类。</p>
+        <p>前端：原生 HTML/CSS/JS · 后端：Flask · 推理：PyTorch (CPU)</p>
+        <!-- 内嵌垃圾桶（用户选了 O：bins 从 fixed 改为 footer 内装饰） -->
+        <div class="bins" id="bins">
+          <div class="bin" data-key="recyclable"><div class="bin-body"><span class="bin-icon">♻️</span><span class="bin-label">可回收物</span></div></div>
+          <div class="bin" data-key="kitchen"><div class="bin-body"><span class="bin-icon">🦴</span><span class="bin-label">厨余垃圾</span></div></div>
+          <div class="bin" data-key="hazardous"><div class="bin-body"><span class="bin-icon">☣️</span><span class="bin-label">有害垃圾</span></div></div>
+          <div class="bin" data-key="other"><div class="bin-body"><span class="bin-icon">🗑️</span><span class="bin-label">其他垃圾</span></div></div>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>项目信息</h4>
+        <p><b>课程</b> 大数据人工智能实训</p>
+        <p><b>题目</b> 生活垃圾四分类图像识别</p>
+        <p><b>答辩人</b> 大数据三班 · 李斯特 等</p>
+        <a href="https://github.com/" target="_blank" rel="noopener">🔗 GitHub 仓库</a>
+      </div>
+
+      <div class="footer-col">
+        <h4>团队成员</h4>
+        <div class="footer-col-team">
+          <div class="footer-team-member">
+            <div class="footer-team-avatar">张</div>
+            <span>张世勇</span>
+            <span class="footer-team-meta">组长 · 算法统筹</span>
+          </div>
+          <div class="footer-team-member">
+            <div class="footer-team-avatar">佳</div>
+            <span>李佳明</span>
+            <span class="footer-team-meta">后端</span>
+          </div>
+          <div class="footer-team-member me">
+            <div class="footer-team-avatar">李</div>
+            <span>李斯特</span>
+            <span class="footer-team-meta">前端</span>
+          </div>
+          <div class="footer-team-member">
+            <div class="footer-team-avatar">孙</div>
+            <span>孙光灏</span>
+            <span class="footer-team-meta">文档演示</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="bin" data-key="kitchen">
-      <div class="bin-body">
-        <span class="bin-icon">🦴</span>
-        <span class="bin-label">厨余垃圾</span>
-      </div>
-    </div>
-    <div class="bin" data-key="hazardous">
-      <div class="bin-body">
-        <span class="bin-icon">☣️</span>
-        <span class="bin-label">有害垃圾</span>
-      </div>
-    </div>
-    <div class="bin" data-key="other">
-      <div class="bin-body">
-        <span class="bin-icon">🗑️</span>
-        <span class="bin-label">其他垃圾</span>
-      </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 大数据三班课程设计 · 仅供教学演示</span>
+      <span class="footer-bottom-tech">Stack: HTML · CSS · JS · Flask · PyTorch · MobileNetV3</span>
     </div>
   </footer>
 
