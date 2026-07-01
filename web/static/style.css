@@ -214,28 +214,9 @@ img { display: block; max-width: 100%; }
   backdrop-filter: blur(12px);
   box-shadow: 0 20px 60px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.8);
 }
-.classify-diagram::before {
-  /* 中心扫描圈 */
-  content: ''; position: absolute;
-  top: 50%; left: 50%;
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), #10b981);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 8px 24px rgba(5,150,105,.35), 0 0 0 8px rgba(5,150,105,.08);
-  z-index: 2;
-  animation: scanPulse 2.6s ease-in-out infinite;
-}
+.classify-diagram::before,
 .classify-diagram::after {
-  /* 中心图标：扫描标记 */
-  content: '◎'; position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  color: #fff; font-family: var(--font-display);
-  font-size: 30px; font-weight: 800;
-  letter-spacing: 0;
-  text-shadow: 0 2px 4px rgba(0,0,0,.2);
+  display: none; /* 移除中央扫描圆圈和图标，保持四色色块干净 */
 }
 @keyframes scanPulse {
   0%, 100% { box-shadow: 0 8px 24px rgba(5,150,105,.35), 0 0 0 8px rgba(5,150,105,.08); }
