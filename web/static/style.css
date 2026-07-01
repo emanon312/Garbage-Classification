@@ -664,11 +664,16 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .site-footer {
   margin-top: 80px;
-  background: var(--bg);
-  color: var(--text);
+  background: linear-gradient(135deg, var(--dark-bg), var(--dark-bg-2));
+  color: var(--cream);
   padding: 72px 24px 48px;
   position: relative;
-  border-top: 1px solid var(--border);
+}
+.site-footer::before {
+  content: ''; position: absolute;
+  top: -60px; left: 0; right: 0; height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--dark-bg));
+  pointer-events: none;
 }
 .footer-cols {
   max-width: 1120px; margin: 0 auto;
@@ -689,39 +694,40 @@ img { display: block; max-width: 100%; }
 .footer-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .footer-col h4 {
   font-size: 12px; text-transform: uppercase; letter-spacing: .12em;
-  color: var(--text); margin-bottom: 16px; font-weight: 700;
+  color: #7bb661; margin-bottom: 16px; font-weight: 600;
 }
-.footer-col p { font-size: 14px; color: var(--text-soft); line-height: 1.7; margin-bottom: 4px; }
-.footer-col p b { color: var(--text); font-weight: 600; }
+.footer-col p { font-size: 14px; color: var(--cream-dim); line-height: 1.7; margin-bottom: 4px; }
+.footer-col p b { color: var(--cream); font-weight: 600; }
 .footer-col a {
-  display: block; color: var(--text-soft); text-decoration: none;
+  display: block; color: var(--cream-dim); text-decoration: none;
   font-size: 14px; padding: 4px 0;
   transition: color .2s, transform .2s;
 }
-.footer-col a:hover { color: var(--primary); transform: translateX(2px); }
+.footer-col a:hover { color: var(--cream); transform: translateX(2px); }
 .footer-col-team {
   display: flex; flex-direction: column; gap: 10px; margin-top: 8px;
 }
 .footer-team-member {
   display: flex; align-items: center; gap: 10px;
-  font-size: 13px; color: var(--text-soft);
+  font-size: 13px; color: var(--cream-dim);
 }
 .footer-team-avatar {
   width: 28px; height: 28px; border-radius: 50%;
-  background: var(--primary-light);
+  background: rgba(241,236,223,.1);
   display: grid; place-items: center;
   font-size: 13px; font-weight: 700;
-  color: var(--primary-hover);
+  color: var(--cream);
+  opacity: .9;
 }
-.footer-team-meta { margin-left: auto; font-size: 11px; color: var(--text-dim); opacity: .8; font-family: var(--font-mono); }
+.footer-team-meta { margin-left: auto; font-size: 11px; color: var(--cream-dim); opacity: .7; font-family: var(--font-mono); }
 
 .footer-bottom {
   max-width: 1120px; margin: 48px auto 0;
   padding-top: 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(241,236,223,.1);
   display: flex; justify-content: space-between; align-items: center;
   gap: 16px;
-  font-size: 12px; color: var(--text-dim);
+  font-size: 12px; color: rgba(241,236,223,.5);
 }
 .footer-bottom-tech { font-family: var(--font-mono); letter-spacing: .04em; }
 
