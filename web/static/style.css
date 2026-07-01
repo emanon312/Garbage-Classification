@@ -722,7 +722,7 @@ img { display: block; max-width: 100%; }
   font-size: 13px; font-weight: 700;
   color: var(--cream);
 }
-.footer-team-member.me .footer-team-avatar { background: var(--primary); color: #fff; }
+.footer-team-avatar { opacity: .9; }
 .footer-team-meta { margin-left: auto; font-size: 11px; color: var(--cream-dim); opacity: .7; font-family: var(--font-mono); }
 
 .footer-bottom {
@@ -826,7 +826,7 @@ img { display: block; max-width: 100%; }
   right: 0; bottom: 0; left: 0;
   display: flex; justify-content: center; gap: 24px;
   padding: 20px 20px 24px;
-  background: linear-gradient(to top, rgba(248,250,251,.97) 0%, rgba(248,250,251,.4) 65%, transparent 100%);
+  background: transparent;
   opacity: .8;
   transform: translateY(8px) scale(.94);
   transition: opacity .5s ease, transform .5s ease;
