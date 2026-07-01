@@ -492,11 +492,8 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .flow-section {
   margin-top: 48px;
-  background:
-    radial-gradient(ellipse 90% 60% at 15% 15%, rgba(123,182,97,.08), transparent 60%),
-    radial-gradient(ellipse 80% 60% at 90% 85%, rgba(212,118,58,.06), transparent 60%),
-    linear-gradient(135deg, var(--dark-bg), var(--dark-bg-2));
-  color: var(--cream);
+  background: var(--bg);
+  color: var(--text);
   padding: 72px 24px;
   margin-left: -9999px; margin-right: -9999px; /* 出格，铺满宽度 */
   padding-left: calc(9999px + 24px); padding-right: calc(9999px + 24px);
@@ -506,7 +503,7 @@ img { display: block; max-width: 100%; }
 .flow-eyebrow {
   font-family: var(--font-mono); font-size: 12px;
   letter-spacing: .28em; text-transform: uppercase;
-  color: #7bb661; margin-bottom: 16px;
+  color: var(--primary); margin-bottom: 16px;
 }
 .flow-heading {
   font-family: var(--font-display);
@@ -514,9 +511,9 @@ img { display: block; max-width: 100%; }
   font-weight: 800; letter-spacing: -.02em; line-height: 1.15;
   margin-bottom: 8px;
 }
-.flow-heading .em { color: var(--accent); }
+.flow-heading .em { color: var(--primary); }
 .flow-sub {
-  color: var(--cream-dim); font-size: 15px; max-width: 60ch; margin-bottom: 36px;
+  color: var(--text-soft); font-size: 15px; max-width: 60ch; margin-bottom: 36px;
 }
 /* 五步流程 */
 .flow-steps {
@@ -527,13 +524,13 @@ img { display: block; max-width: 100%; }
 }
 .flow-step {
   position: relative; padding: 22px 18px;
-  background: rgba(241,236,223,.05);
-  border: 1px solid var(--dark-line);
+  background: rgba(255,255,255,.6);
+  border: 1px solid var(--border);
   border-radius: 14px;
   text-align: center;
   transition: transform .3s, background .3s;
 }
-.flow-step:hover { transform: translateY(-4px); background: rgba(241,236,223,.08); }
+.flow-step:hover { transform: translateY(-4px); background: rgba(255,255,255,.9); }
 .flow-step-no {
   display: inline-block;
   width: 32px; height: 32px; line-height: 32px;
@@ -547,7 +544,7 @@ img { display: block; max-width: 100%; }
   font-family: var(--font-display); font-weight: 700; font-size: 16px;
   margin-bottom: 6px;
 }
-.flow-step-desc { font-size: 13px; color: var(--cream-dim); line-height: 1.5; }
+.flow-step-desc { font-size: 13px; color: var(--text-soft); line-height: 1.5; }
 .flow-step + .flow-step { margin-top: 0; }
 /* 步骤间箭头 */
 .flow-step::after {
@@ -561,9 +558,9 @@ img { display: block; max-width: 100%; }
 .flow-step:last-child::after { display: none; }
 
 .flow-note {
-  margin-top: 28px; font-size: 14px; color: var(--cream); line-height: 1.6;
+  margin-top: 28px; font-size: 14px; color: var(--text); line-height: 1.6;
 }
-.flow-note b { color: #7bb661; font-weight: 600; }
+.flow-note b { color: var(--primary); font-weight: 600; }
 
 /* ============================================================
    新增 · 分类小百科
@@ -667,17 +664,11 @@ img { display: block; max-width: 100%; }
    ============================================================ */
 .site-footer {
   margin-top: 80px;
-  background: linear-gradient(135deg, var(--dark-bg), var(--dark-bg-2));
-  color: var(--cream);
+  background: var(--bg);
+  color: var(--text);
   padding: 72px 24px 48px;
   position: relative;
-}
-.site-footer::before {
-  /* 顶部渐变过渡到主背景 */
-  content: ''; position: absolute;
-  top: -60px; left: 0; right: 0; height: 60px;
-  background: linear-gradient(to bottom, transparent, var(--dark-bg));
-  pointer-events: none;
+  border-top: 1px solid var(--border);
 }
 .footer-cols {
   max-width: 1120px; margin: 0 auto;
@@ -698,40 +689,39 @@ img { display: block; max-width: 100%; }
 .footer-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
 .footer-col h4 {
   font-size: 12px; text-transform: uppercase; letter-spacing: .12em;
-  color: #7bb661; margin-bottom: 16px; font-weight: 600;
+  color: var(--text); margin-bottom: 16px; font-weight: 700;
 }
-.footer-col p { font-size: 14px; color: var(--cream-dim); line-height: 1.7; margin-bottom: 4px; }
-.footer-col p b { color: var(--cream); font-weight: 600; }
+.footer-col p { font-size: 14px; color: var(--text-soft); line-height: 1.7; margin-bottom: 4px; }
+.footer-col p b { color: var(--text); font-weight: 600; }
 .footer-col a {
-  display: block; color: var(--cream-dim); text-decoration: none;
+  display: block; color: var(--text-soft); text-decoration: none;
   font-size: 14px; padding: 4px 0;
   transition: color .2s, transform .2s;
 }
-.footer-col a:hover { color: var(--cream); transform: translateX(2px); }
+.footer-col a:hover { color: var(--primary); transform: translateX(2px); }
 .footer-col-team {
   display: flex; flex-direction: column; gap: 10px; margin-top: 8px;
 }
 .footer-team-member {
   display: flex; align-items: center; gap: 10px;
-  font-size: 13px; color: var(--cream-dim);
+  font-size: 13px; color: var(--text-soft);
 }
 .footer-team-avatar {
   width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(241,236,223,.1);
+  background: var(--primary-light);
   display: grid; place-items: center;
   font-size: 13px; font-weight: 700;
-  color: var(--cream);
+  color: var(--primary-hover);
 }
-.footer-team-avatar { opacity: .9; }
-.footer-team-meta { margin-left: auto; font-size: 11px; color: var(--cream-dim); opacity: .7; font-family: var(--font-mono); }
+.footer-team-meta { margin-left: auto; font-size: 11px; color: var(--text-dim); opacity: .8; font-family: var(--font-mono); }
 
 .footer-bottom {
   max-width: 1120px; margin: 48px auto 0;
   padding-top: 24px;
-  border-top: 1px solid rgba(241,236,223,.1);
+  border-top: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
   gap: 16px;
-  font-size: 12px; color: rgba(241,236,223,.5);
+  font-size: 12px; color: var(--text-dim);
 }
 .footer-bottom-tech { font-family: var(--font-mono); letter-spacing: .04em; }
 
