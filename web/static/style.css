@@ -227,14 +227,15 @@ img { display: block; max-width: 100%; }
   animation: scanPulse 2.6s ease-in-out infinite;
 }
 .classify-diagram::after {
-  /* 中心图标：扫描 AI 标记 */
-  content: 'AI'; position: absolute;
+  /* 中心图标：扫描标记 */
+  content: '◎'; position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3;
   color: #fff; font-family: var(--font-display);
-  font-size: 22px; font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 30px; font-weight: 800;
+  letter-spacing: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,.2);
 }
 @keyframes scanPulse {
   0%, 100% { box-shadow: 0 8px 24px rgba(5,150,105,.35), 0 0 0 8px rgba(5,150,105,.08); }
@@ -668,8 +669,9 @@ img { display: block; max-width: 100%; }
   margin-top: 80px;
   background: linear-gradient(135deg, var(--dark-bg), var(--dark-bg-2));
   color: var(--cream);
-  padding: 72px 24px 180px; /* 底部留很大空间给 fixed bins */
+  padding: 72px 24px 36px;
   position: relative;
+  padding-bottom: 100px; /* 为 fixed 垃圾桶预留空间 */
 }
 .site-footer::before {
   /* 顶部渐变过渡到主背景 */
@@ -823,11 +825,11 @@ img { display: block; max-width: 100%; }
 .bins {
   position: fixed; z-index: 50;
   right: 0; bottom: 0; left: 0;
+  width: 100%;
   display: flex; justify-content: center; gap: 24px;
   padding: 24px 20px 28px;
-  /* 渐变底座和 footer 深色融合 */
-  background:
-    linear-gradient(to top, rgba(15,40,23,.85) 0%, rgba(15,40,23,.4) 60%, transparent 100%);
+  /* 深色融合背景 — 和 footer 同色，填满底部 */
+  background: var(--dark-bg);
   opacity: .85;
   transform: translateY(8px) scale(.94);
   transition: opacity .5s ease, transform .5s ease;
