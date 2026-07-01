@@ -55,7 +55,7 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   min-height: 100vh;
-  padding-bottom: 40px;
+  padding-bottom: 0;
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.6;
