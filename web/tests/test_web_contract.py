@@ -45,6 +45,8 @@ def test_frontend_wires_history_and_feedback_behaviors():
         "closeCorrection",
         "correctOverlay",
         "loadingOverlay",
+        'fetch("/metadata"',
+        'fetch("/health"',
     ]
 
     missing = [item for item in required_snippets if item not in js]

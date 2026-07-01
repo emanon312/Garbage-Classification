@@ -373,7 +373,7 @@
   </div>
 
   <!-- ============================================================
-       新增 · 深色 Footer：项目信息 + 团队 + 内嵌垃圾桶
+       Footer：公开项目说明
        ============================================================ -->
   <footer class="site-footer" id="about">
     <div class="footer-cols">
@@ -387,42 +387,21 @@
       </div>
 
       <div class="footer-col">
-        <h4>项目信息</h4>
-        <p><b>课程</b> 大数据人工智能实训</p>
-        <p><b>题目</b> 生活垃圾四分类图像识别</p>
-        <p><b>答辩人</b> 大数据一班 · 张世勇</p>
-        <a href="https://github.com/" target="_blank" rel="noopener">🔗 GitHub 仓库</a>
+        <h4>开源说明</h4>
+        <p>本项目基于开源课程设计 <b>guanqr/Garbage-Classification</b> 整理和二次开发。</p>
+        <p>公开仓库不包含数据集、答辩材料、个人展示稿和本地纠错样本。</p>
+        <a href="https://github.com/emanon312/Garbage-Classification" target="_blank" rel="noopener">GitHub 仓库</a>
       </div>
 
       <div class="footer-col">
-        <h4>团队成员</h4>
-        <div class="footer-col-team">
-          <div class="footer-team-member">
-            <div class="footer-team-avatar">张</div>
-            <span>张世勇</span>
-            <span class="footer-team-meta">组长 · 算法统筹</span>
-          </div>
-          <div class="footer-team-member">
-            <div class="footer-team-avatar">佳</div>
-            <span>李佳明</span>
-            <span class="footer-team-meta">后端</span>
-          </div>
-          <div class="footer-team-member">
-            <div class="footer-team-avatar">李</div>
-            <span>李斯特</span>
-            <span class="footer-team-meta">前端</span>
-          </div>
-          <div class="footer-team-member">
-            <div class="footer-team-avatar">孙</div>
-            <span>孙光灏</span>
-            <span class="footer-team-meta">文档演示</span>
-          </div>
-        </div>
+        <h4>架构特性</h4>
+        <p>模型按需懒加载，页面健康检查与模型加载状态解耦。</p>
+        <p>纠错样本仅保存在本地 <code>web/feedback/</code>，用于后续人工筛选和重训。</p>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <span>© 2026 大数据三班课程设计 · 仅供教学演示</span>
+      <span>© 2026 EcoSort Demo · Open-source learning project</span>
       <span class="footer-bottom-tech">Stack: HTML · CSS · JS · Flask · PyTorch · MobileNetV3</span>
     </div>
   </footer>

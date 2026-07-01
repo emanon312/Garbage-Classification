@@ -88,6 +88,7 @@ let activeHistoryId = "";
 
 initCorrectionChips();
 renderHistory();
+loadMetadata();
 healthCheck();
 
 // 点击纠错遮罩空白处关闭
@@ -669,7 +670,7 @@ async function healthCheck() {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
-    const resp = await fetch("/", { method: "HEAD", signal: controller.signal });
+    const resp = await fetch("/health", { method: "GET", signal: controller.signal });
     clearTimeout(timeout);
     backendOnline = resp.ok;
   } catch {
@@ -678,5 +679,36 @@ async function healthCheck() {
   if (!backendOnline) {
     setStatus("后端未连接，使用演示模式", "loading");
     renderStats();
+  }
+}
+
+async function loadMetadata() {
+  try {
+    const resp = await fetch("/metadata");
+    if (!resp.ok) return;
+    const payload = await resp.json();
+
+    if (Array.isArray(payload.classes)) {
+      Object.keys(CLASS_CN).forEach((key) => delete CLASS_CN[key]);
+      payload.classes.forEach((item) => { CLASS_CN[item.key] = item.cn; });
+      initCorrectionChips();
+    }
+
+    if (payload.groups) {
+      Object.values(payload.groups).forEach((item) => {
+        GROUP_META[item.key] = {
+          cn: item.cn,
+          color: item.color,
+          advice: item.advice,
+        };
+      });
+    }
+
+    if (payload.knowledge) {
+      Object.keys(TRASH_KNOWLEDGE).forEach((key) => delete TRASH_KNOWLEDGE[key]);
+      Object.assign(TRASH_KNOWLEDGE, payload.knowledge);
+    }
+  } catch (error) {
+    console.warn("Metadata endpoint unavailable; using bundled fallback.", error);
   }
 }

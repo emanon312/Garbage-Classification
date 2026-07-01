@@ -13,6 +13,9 @@ import numpy as np
 import torch
 from torchvision import transforms
 
+from metadata import CLASS_CN as _CLASS_CN
+from metadata import GROUPS
+
 # ---------- 用绝对路径定位 Code 目录，并加入 sys.path 以便 import config / models ----------
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _CODE_DIR = os.path.normpath(os.path.join(_THIS_DIR, "..", "Code"))
@@ -29,18 +32,11 @@ _DATASET_INFO_PATH = os.path.join(_CODE_DIR, "checkpoint", "exp2", "DataSetInfo.
 
 # ---------- 英文大类 → 中文 / group_key / advice 映射（严格按 CONTRACT.md） ----------
 _GROUP_MAP = {
-    "Recyclables": ("可回收物", "recyclable", "请投入蓝色可回收物桶"),
-    "Kitchen waste": ("厨余垃圾", "kitchen", "请投入绿色厨余垃圾桶"),
-    "Hazardous waste": ("有害垃圾", "hazardous", "请投入红色有害垃圾桶"),
-    "Other": ("其他垃圾", "other", "请投入灰色其他垃圾桶"),
+    model_name: (data["cn"], data["key"], data["advice"])
+    for model_name, data in GROUPS.items()
 }
 
 # ---------- 12 小类英文 → 中文映射（严格按 CONTRACT.md） ----------
-_CLASS_CN = {
-    "cardboard": "纸板", "glass": "玻璃", "metal": "金属", "plastic": "塑料",
-    "clothes": "衣物", "paper": "纸张", "bananapeel": "香蕉皮", "vegetable": "蔬菜",
-    "battery": "电池", "lightbulb": "灯泡", "drugs": "药品", "papercup": "纸杯",
-}
 
 # ---------- 模块级加载：模型与数据集信息只加载一次 ----------
 _DATASET_INFO = torch.load(_DATASET_INFO_PATH)
