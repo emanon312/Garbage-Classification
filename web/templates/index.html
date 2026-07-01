@@ -421,19 +421,19 @@
       </div>
     </div>
 
-    <!-- 底部垃圾桶（嵌入 footer，跟随页面滚动） -->
-    <div class="footer-bins" id="bins">
-      <div class="bin" data-key="recyclable"><div class="bin-body"><span class="bin-icon">♻️</span><span class="bin-label">可回收物</span></div></div>
-      <div class="bin" data-key="kitchen"><div class="bin-body"><span class="bin-icon">🦴</span><span class="bin-label">厨余垃圾</span></div></div>
-      <div class="bin" data-key="hazardous"><div class="bin-body"><span class="bin-icon">☣️</span><span class="bin-label">有害垃圾</span></div></div>
-      <div class="bin" data-key="other"><div class="bin-body"><span class="bin-icon">🗑️</span><span class="bin-label">其他垃圾</span></div></div>
-    </div>
-
     <div class="footer-bottom">
       <span>© 2026 大数据三班课程设计 · 仅供教学演示</span>
       <span class="footer-bottom-tech">Stack: HTML · CSS · JS · Flask · PyTorch · MobileNetV3</span>
     </div>
   </footer>
+
+  <!-- 底部垃圾桶（fixed 定位，页面最底部悬浮） -->
+  <div class="bins" id="bins">
+    <div class="bin" data-key="recyclable"><div class="bin-body"><span class="bin-icon">♻️</span><span class="bin-label">可回收物</span></div></div>
+    <div class="bin" data-key="kitchen"><div class="bin-body"><span class="bin-icon">🦴</span><span class="bin-label">厨余垃圾</span></div></div>
+    <div class="bin" data-key="hazardous"><div class="bin-body"><span class="bin-icon">☣️</span><span class="bin-label">有害垃圾</span></div></div>
+    <div class="bin" data-key="other"><div class="bin-body"><span class="bin-icon">🗑️</span><span class="bin-label">其他垃圾</span></div></div>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>

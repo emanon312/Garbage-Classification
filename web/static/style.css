@@ -821,8 +821,18 @@ img { display: block; max-width: 100%; }
 .confidence-num.mid { color: var(--accent); }
 .confidence-num.low { color: var(--hazardous); }
 
-.footer-bins {
-  display: none; /* 视觉隐藏，保留 DOM 供 flyToBin 动画 */
+.bins {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 20px;
+  background: transparent; /* 去掉背景 */
+  z-index: 100;
 }
 .bins.has-result { opacity: 1; transform: translateY(0) scale(1); }
 .bin { width: 100px; text-align: center; transition: transform .25s; }
