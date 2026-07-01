@@ -55,7 +55,7 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   min-height: 100vh;
-  padding-bottom: 40px; /* 底部由 footer 承接，不再需要额外留白 */
+  padding-bottom: 180px;
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.6;
@@ -671,7 +671,6 @@ img { display: block; max-width: 100%; }
   color: var(--cream);
   padding: 72px 24px 36px;
   position: relative;
-  padding-bottom: 100px; /* 为 fixed 垃圾桶预留空间 */
 }
 .site-footer::before {
   /* 顶部渐变过渡到主背景 */
@@ -825,12 +824,10 @@ img { display: block; max-width: 100%; }
 .bins {
   position: fixed; z-index: 50;
   right: 0; bottom: 0; left: 0;
-  width: 100%;
   display: flex; justify-content: center; gap: 24px;
-  padding: 24px 20px 28px;
-  /* 深色融合背景 — 和 footer 同色，填满底部 */
-  background: var(--dark-bg);
-  opacity: .85;
+  padding: 20px 20px 24px;
+  background: linear-gradient(to top, rgba(248,250,251,.97) 0%, rgba(248,250,251,.4) 65%, transparent 100%);
+  opacity: .8;
   transform: translateY(8px) scale(.94);
   transition: opacity .5s ease, transform .5s ease;
 }
@@ -925,7 +922,7 @@ img { display: block; max-width: 100%; }
   .bin-body { height: 80px; gap: 4px; padding: 10px 4px 6px; }
   .bin-icon { font-size: 20px; }
   .bin-label { font-size: 11px; }
-  .fab-correct { right: 14px; bottom: 200px; width: 50px; height: 50px; font-size: 10px; }
+  .fab-correct { right: 14px; bottom: 190px; width: 50px; height: 50px; font-size: 10px; }
   .fab-correct svg { width: 18px; height: 18px; }
   .result-head { flex-direction: column; align-items: flex-start; }
   .stats-summary { gap: 20px; }
@@ -936,7 +933,7 @@ img { display: block; max-width: 100%; }
   
   .hero h1 { font-size: clamp(28px, 9vw, 40px); }
   .subtitle { font-size: 14px; }
-  .bins { gap: 6px; padding: 10px 4px 12px; }
+  .bins { gap: 6px; padding: 8px 4px 10px; }
   .bin { width: 60px; }
   .bin-body { height: 64px; gap: 2px; padding: 8px 2px 4px; }
   .bin-icon { font-size: 16px; }
