@@ -55,7 +55,7 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   min-height: 100vh;
-  padding-bottom: 180px;
+  padding-bottom: 40px;
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.6;
@@ -669,7 +669,7 @@ img { display: block; max-width: 100%; }
   margin-top: 80px;
   background: linear-gradient(135deg, var(--dark-bg), var(--dark-bg-2));
   color: var(--cream);
-  padding: 72px 24px 36px;
+  padding: 72px 24px 48px;
   position: relative;
 }
 .site-footer::before {
@@ -821,15 +821,10 @@ img { display: block; max-width: 100%; }
 .confidence-num.mid { color: var(--accent); }
 .confidence-num.low { color: var(--hazardous); }
 
-.bins {
-  position: fixed; z-index: 50;
-  right: 0; bottom: 0; left: 0;
+.footer-bins {
   display: flex; justify-content: center; gap: 24px;
-  padding: 20px 20px 24px;
-  background: transparent;
-  opacity: .8;
-  transform: translateY(8px) scale(.94);
-  transition: opacity .5s ease, transform .5s ease;
+  padding: 32px 20px;
+  border-bottom: 1px solid rgba(241,236,223,.1);
 }
 .bins.has-result { opacity: 1; transform: translateY(0) scale(1); }
 .bin { width: 100px; text-align: center; transition: transform .25s; }
